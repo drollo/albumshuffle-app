@@ -7,8 +7,9 @@ require([
   'use strict';
 
   var button = buttons.Button.withLabel('Shuffle albums');
-  document.getElementById('buttonContainer').appendChild(button.node);
-  document.getElementById('buttonContainer').addEventListener('click', handleClick);
+  var buttonElement = document.getElementById('buttonContainer');
+  buttonElement.appendChild(button.node);
+  buttonElement.addEventListener('click', handleClick);
 
   function handleClick() {
     var sourcePlaylistURI = document.getElementById('SOURCE_URI_ID').value;
@@ -18,12 +19,12 @@ require([
 
     models.Playlist.fromURI(destinationPlaylistURI).load('tracks').done(function(destinationPlaylist){
       var list = List.forPlaylist(destinationPlaylist);
-      var childNodes = document.getElementById('playlistContainer').childNodes;
-      if (childNodes.length != 0)
+      var playlistElement = document.getElementById('playlistContainer');
+      if (playlistElement.childNodes.length != 0)
       {
-        childNodes.removeChild(childNodes[0])
+        playlistElement.childNodes.removeChild(childNodes[0]);
       }
-      document.getElementById('playlistContainer').appendChild(list.node);
+      playlistElement.appendChild(list.node);
       list.init();
     });
   } 
