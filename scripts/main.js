@@ -31,8 +31,8 @@ require([
   function readDestination() {
     destinationPlaylistURI = destinationInputElement.value;
     if (destinationPlaylistURI != "") {
-      models.Playlist.fromURI(destinationPlaylistURI).load('name').done(function(sourcePlaylist) {
-        destinationInputElement.value = sourcePlaylist.name;
+      models.Playlist.fromURI(destinationPlaylistURI).load('name').done(function(destinationPlaylist) {
+        destinationInputElement.value = destinationPlaylist.name;
       });
     }
   }
