@@ -1,17 +1,13 @@
 require([
   '$api/models',
   'scripts/albumshuffle',
-  '$views/list#List',
+  '$views/list',
   '$views/buttons'
-], function(models, albumShuffle, List, buttons) {
+], function(models, albumShuffle, list, buttons) {
   'use strict';
 
   var sourcePlaylistURI = "", destinationPlaylistURI = "";
-
-  var button = buttons.Button.withLabel('Shuffle albums');
-  var buttonElement = document.getElementById('buttonContainer');
-  buttonElement.appendChild(button.node);
-  buttonElement.addEventListener('click', handleClick);
+  var sourceUriOK = false, destinationUriOK = false;
 
   var sourceInputElement = document.getElementById('SOURCE_URI_ID');
   sourceInputElement.addEventListener('input', readSource);
@@ -19,11 +15,29 @@ require([
   var destinationInputElement = document.getElementById('DESTINATION_URI_ID');
   destinationInputElement.addEventListener('input', readDestination);
 
+  initButtons();
+
+  function initButtons() {
+    var button = buttons.Button.withLabel('Shuffle albums');
+    var buttonElement = document.getElementById('buttonContainer');
+    buttonElement.addEventListener('click', shuffleHandler);
+    buttonElement.appendChild(button.node);
+
+    var clearSourceButtonElement = document.getElementById("clearSourceButton");
+    clearSourceButtonElement.addEventListener('click', clearSourceHandler);
+
+    var clearDestinationButtonElement = document.getElementById("clearDestinationButton");
+    clearDestinationButtonElement.addEventListener('click', clearDestinationHandler);
+  }
+
   function readSource() {
     sourcePlaylistURI = sourceInputElement.value;
     if (sourcePlaylistURI != "") {
       models.Playlist.fromURI(sourcePlaylistURI).load('name').done(function(sourcePlaylist) {
         sourceInputElement.value = sourcePlaylist.name;
+        sourceInputElement.disabled = true;
+      }).fail(function() {
+        sourceInputElement.value = "";
       });
     }
   }
@@ -33,23 +47,48 @@ require([
     if (destinationPlaylistURI != "") {
       models.Playlist.fromURI(destinationPlaylistURI).load('name').done(function(destinationPlaylist) {
         destinationInputElement.value = destinationPlaylist.name;
+        destinationInputElement.disabled = true;
+      }).fail(function() {
+        destinationInputElement.value = "";
       });
     }
   }
 
-  function handleClick() {
+  function clearSourceHandler() {
+    sourceInputElement.value = "";
+    sourceInputElement.disabled = false;
+    sourcePlaylistURI = "";
+  }
+
+  function clearDestinationHandler() {
+    destinationInputElement.value = "";
+    destinationInputElement.disabled = false;
+    destinationPlaylistURI = "";
+  }
+
+  function shuffleHandler() {
     if (sourcePlaylistURI != "" && destinationPlaylistURI != "") {
       albumShuffle.shuffleAlbums(sourcePlaylistURI, destinationPlaylistURI);
-      models.Playlist.fromURI(destinationPlaylistURI).load('tracks').done(function(destinationPlaylist) {
-        var list = List.forPlaylist(destinationPlaylist);
-        var playlistElement = document.getElementById('playlistContainer');
-        if (playlistElement.childNodes.length != 0)
-        {
-          playlistElement.removeChild(playlistElement.childNodes[0]);
-        }
-        playlistElement.appendChild(list.node);
-        list.init();
+
+      var destinationPlaylist = models.Playlist.fromURI(destinationPlaylistURI);   
+      var playlistTable = list.List.forPlaylist(destinationPlaylist, { 
+        fields: [
+          'nowplaying',
+          'track', 
+          'artist', 
+          'album', 
+          'time'
+        ],
+        style: "rounded"
       });
+        
+      var playlistElement = document.getElementById('playlistContainer');
+      if (playlistElement.childNodes.length != 0)
+      {
+        playlistElement.removeChild(playlistElement.childNodes[0]);
+      }
+      playlistElement.appendChild(playlistTable.node);
+      playlistTable.init();
     }
   } 
 });

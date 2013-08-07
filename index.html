@@ -6,22 +6,26 @@
     <title>Album Shuffler</title>
     <link rel="stylesheet" href="$views/css/list.css">
     <link rel="stylesheet" href="$views/css/buttons.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
   </head>
   <body>
     <script type="text/javascript" src="scripts/main.js"></script>
     <h1>Album shuffler</h1>
-    <div>
-        <p><b>Source playlist URI:</b></p>
-        <input type="text" id="SOURCE_URI_ID" value="" style="width: 450px">
-    </div>
-    <div>
-        <p><b>Destination playlist URI:</b></p>
-        <input type="text" id="DESTINATION_URI_ID" value="" style="width: 450px">
-    </div>
+    <span class="inputField">
+        <p>Source playlist</p>
+        <input type="text" id="SOURCE_URI_ID" value="">
+        <span id="clearSourceButton"></span>
+    </span>
     </br>
-    <div type="button" id="buttonContainer"></div>
+    <span class="inputField">
+        <p>Destination playlist</p>
+        <input type="text" id="DESTINATION_URI_ID" value="">
+        <span id="clearDestinationButton"></span>
+    </span>
     </br>
-    <div id="playlistContainer"></div>     
+    <span type="button" id="buttonContainer" class="shuffleButton"></span>
+    </br>
+    <span id="playlistContainer" class="playlist"></span>     
   </body>
 </html>
 

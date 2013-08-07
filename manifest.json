@@ -17,8 +17,8 @@
   "BundleType": "Application",
   "BundleVersion": "0.0.1",
   "Dependencies": {
-    "api": "1.10.2",
-    "views": "1.18.1"
+    "api": "1.8.0",
+    "views": "1.31.0"
   },
   "RequiredPermissions": [
     "https://api.mygreatapp.com"

@@ -4,7 +4,6 @@ require([
   'use strict';
 
   var shuffleAlbums = function(sourcePlaylistURI, destinationPlaylistURI) {
-
     var lastAlbum = null;
     var uniqueAlbumTracks = [];
 
@@ -39,7 +38,7 @@ require([
           });
         }); 
       }
-    });    
+    });   
   };
 
   //Fisher–Yates shuffle

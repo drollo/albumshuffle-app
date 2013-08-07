@@ -1,0 +1,60 @@
+html {
+	background-color: rgb(71,71,71); 
+}
+h1 {
+	position: relative;
+	font-family: Georgia;
+	font-size: 38px;
+	left: 30px;
+	width: 325px;
+	color: rgba(0,0,0,0.6);
+}
+span.inputField {
+	position: relative;
+	left: 25px;
+}
+span.inputField span {
+	position: absolute;
+    display: block;
+    top: -2px;
+    right: 10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 20px;
+    background: url('../images/icons/clearButton-18x18.png');
+    cursor: pointer;
+    box-shadow:
+      inset 0px 0px 10px rgba(0,0,0,0.8), 
+            0px 0px 10px rgba(0,0,0,0.8);
+}
+span.inputField input {
+	font-family: Georgia;
+	border: 5px solid rgba(255,255,255,0.2);
+    border-radius: 20px; 
+    box-shadow: 
+      inset 0px 0px 16px  rgba(255,255,255,0.4),
+            5px 5px 16px rgba(0,0,0,0.9); 
+    padding: 5px;
+    padding-left: 25px;
+    background: rgba(200,200,200,0.3);
+    margin: 0 0 10px 0;
+    font-family:Gerogia;
+    font-size:18px;
+    font-weight:bold;
+    width: 275px;
+	color: rgba(0,0,0,0.6);
+}
+p {
+	font-family: Georgia;
+	font-size: 14px;
+	color: rgba(0,0,0,0.8);
+}
+span.shuffleButton {
+	position: relative;
+	left: 30px;
+	top: 15px;
+}
+span.playlist {	
+	position: relative;
+	top: 40px;
+}
