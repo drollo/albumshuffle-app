@@ -21,7 +21,7 @@
     "views": "1.31.0"
   },
   "RequiredPermissions": [
-    "https://api.mygreatapp.com"
+    ""
   ],
   "SupportedDeviceClasses": [
     "Web",
@@ -30,5 +30,5 @@
   "SupportedLanguages": [
     "en"
   ],
-  "VendorIdentifier": "com.myorganization"
+  "VendorIdentifier": ""
 }

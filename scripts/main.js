@@ -1,28 +1,33 @@
 require([
   '$api/models',
   '$api/library',
-  'scripts/albumshuffle',
+  'scripts/albumshuffle#shuffleAlbums',
   '$views/buttons',
   '$views/list'
-], function(models, library, albumShuffle, buttons, list) {
+], function(models, library, shuffleAlbums, buttons, list) {
   'use strict';
 
-  var playlistElement = document.getElementById('playlistContainer');
   var hintText = 'Drag playlist here';
   var nameColor = 'rgba(0,0,0,0.6)';
   var hintColor = 'rgba(0,0,0,0.2)';
-  
+  var playlistList;
+
+  var playlistElement = document.getElementById('playlistContainer');
+  document.getElementById('inputSpan').addEventListener('mouseover', deselectInput);
+
   var sourceInputElement = document.getElementById('SOURCE_URI_ID');
   sourceInputElement.addEventListener('input', readSource);
   sourceInputElement.addEventListener('dragover', hideHint);
-  sourceInputElement.addEventListener('mouseout', showHint);
+  sourceInputElement.addEventListener('mouseenter', showHint);
   sourceInputElement.addEventListener('dragleave', showHint);
   sourceInputElement.value = hintText;
 
-  var playlistList;
-
   var clearSourceButtonElement = document.getElementById("clearSourceButton");
   clearSourceButtonElement.addEventListener('click', clearSourceHandler);
+
+  function deselectInput() {
+    window.getSelection().empty();
+  }
 
   function hideHint() {
     sourceInputElement.value = "";
@@ -33,15 +38,16 @@ require([
       sourceInputElement.value = hintText;
     }
   }
-
+  
   function readSource() {
     var sourcePlaylistURI = sourceInputElement.value;
     if (sourcePlaylistURI != "") {
       models.Playlist.fromURI(sourcePlaylistURI).load('name').done(function(sourcePlaylist) {
         sourceInputElement.style.color = nameColor;
         sourceInputElement.value = sourcePlaylist.name;
-        sourceInputElement.style.width = (sourceInputElement.value.length * 15).toString() + 'px';
+        sourceInputElement.style.width = (sourceInputElement.value.length * 12).toString() + 'px';
         sourceInputElement.disabled = true;
+        clearSourceButtonElement.style.display = 'block';
         shuffleHandler(sourcePlaylistURI);
       }).fail(function() {
         sourceInputElement.value = hintText;
@@ -53,10 +59,11 @@ require([
     sourceInputElement.value = hintText;
     sourceInputElement.style.color = hintColor;
     sourceInputElement.disabled = false;
-    sourceInputElement.style.width = '200px'
+    sourceInputElement.style.width = '190px'
     if (playlistElement.childNodes.length != 0) {
       playlistList.destroy();
     }
+    clearSourceButtonElement.style.display = 'none';
   }
 
   function shuffleHandler(sourcePlaylistURI) {
@@ -74,20 +81,19 @@ require([
             snapshotPlaylist.load('tracks').done(function(tracksplaylist) {
               tracksplaylist.tracks.clear();
             });
-            albumShuffle.shuffleAlbums(sourcePlaylist, snapshotPlaylist);
+            shuffleAlbums(sourcePlaylist, snapshotPlaylist);
             playlistList = list.List.forPlaylist(snapshotPlaylist, {style: 'rounded'});
           }
         });
       });
-    if (playlistFound == false) {
-      models.Playlist.create(destinationName).done(function(newPlaylist) {         
-        albumShuffle.shuffleAlbums(sourcePlaylist, newPlaylist);
-        playlistList = list.List.forPlaylist(newPlaylist, {style: 'rounded'});
-      });  
-    }
-    playlistElement.appendChild(playlistList.node);
-    playlistList.init();
-    playlistList.focus()
-  });
+      if (playlistFound == false) {
+        models.Playlist.create(destinationName).done(function(newPlaylist) {         
+          shuffleAlbums(sourcePlaylist, newPlaylist);
+          playlistList = list.List.forPlaylist(newPlaylist, {style: 'rounded'});
+        });  
+      }
+      playlistElement.appendChild(playlistList.node);
+      playlistList.init();
+    });
   }
 });
