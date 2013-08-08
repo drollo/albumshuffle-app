@@ -29,25 +29,21 @@ span.inputField span {
 }
 span.inputField input {
 	font-family: Georgia;
-	border: 5px solid rgba(255,255,255,0.2);
+	border: 1px solid rgba(0,0,0,0.7);
     border-radius: 20px; 
     box-shadow: 
-      inset 0px 0px 16px  rgba(255,255,255,0.4),
-            5px 5px 16px rgba(0,0,0,0.9); 
-    padding: 5px;
+      inset 0px 0px 16px  rgba(0,0,0,0.4),
+            5px 5px 16px rgba(0,0,0,0.9);
+    padding-top: 5px;
+    padding-bottom: 5px;
     padding-left: 25px;
-    background: rgba(200,200,200,0.3);
-    margin: 0 0 10px 0;
+    background: rgba(200,200,200,0.7);
     font-family: Georgia;
     font-size: 18px;
     font-weight: bold;
-    width: 275px;
-	color: rgba(0,0,0,0.6);
-}
-p {
-	font-family: Georgia;
-	font-size: 14px;
-	color: rgba(0,0,0,0.8);
+    min-width: 100px;
+	cursor: inherit;
+	color: rgba(0,0,0,0.2);
 }
 span.playlist {
 	position: relative;
