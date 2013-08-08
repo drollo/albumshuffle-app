@@ -3,12 +3,12 @@ require([
 ], function(models) {
   'use strict';
 
-  var shuffleAlbums = function(sourcePlaylistURI, destinationPlaylistURI) {
+  var shuffleAlbums = function(sourcePlaylist, destinationPlaylist) {
     var lastAlbum = null;
     var uniqueAlbumTracks = [];
 
     //Read tracks from source playlist and parse one track per unique album
-    models.Playlist.fromURI(sourcePlaylistURI).load('tracks').done(function(sourcePlaylist){
+    sourcePlaylist.load('tracks').done(function(sourcePlaylist){
       sourcePlaylist.tracks.snapshot().done(function(tracksSnapshot) {                              
         tracksSnapshot.loadAll('album').each(function(trackToCheck) {
           var currentAlbum = trackToCheck.album;
@@ -24,7 +24,7 @@ require([
     shuffleArray(uniqueAlbumTracks);
 
     //Write the albums containing the shuffled tracks to destination playlist
-    models.Playlist.fromURI(destinationPlaylistURI).load('tracks').done(function(destinationPlaylist){
+    destinationPlaylist.load('tracks').done(function(destinationPlaylist){
       destinationPlaylist.tracks.clear();
       for (var i = 0; i < uniqueAlbumTracks.length; i++) {
         uniqueAlbumTracks[i].load('album').done(function(shuffledTrack) {

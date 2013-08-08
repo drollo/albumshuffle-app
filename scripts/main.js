@@ -1,53 +1,29 @@
 require([
   '$api/models',
+  '$api/library',
   'scripts/albumshuffle',
-  '$views/buttons'
-], function(models, albumShuffle, buttons) {
+  '$views/buttons',
+  '$views/list'
+], function(models, library, albumShuffle, buttons, list) {
   'use strict';
-
-  var sourcePlaylistURI = "", destinationPlaylistURI = "";
 
   var sourceInputElement = document.getElementById('SOURCE_URI_ID');
   sourceInputElement.addEventListener('input', readSource);
 
-  var destinationInputElement = document.getElementById('DESTINATION_URI_ID');
-  destinationInputElement.addEventListener('input', readDestination);
+  var playlistList;
 
-  initButtons();
-
-  function initButtons() {
-    var button = buttons.Button.withLabel('Shuffle albums');
-    var buttonElement = document.getElementById('buttonContainer');
-    buttonElement.addEventListener('click', shuffleHandler);
-    buttonElement.appendChild(button.node);
-
-    var clearSourceButtonElement = document.getElementById("clearSourceButton");
-    clearSourceButtonElement.addEventListener('click', clearSourceHandler);
-
-    var clearDestinationButtonElement = document.getElementById("clearDestinationButton");
-    clearDestinationButtonElement.addEventListener('click', clearDestinationHandler);
-  }
+  var clearSourceButtonElement = document.getElementById("clearSourceButton");
+  clearSourceButtonElement.addEventListener('click', clearSourceHandler);
 
   function readSource() {
-    sourcePlaylistURI = sourceInputElement.value;
+    var sourcePlaylistURI = sourceInputElement.value;
     if (sourcePlaylistURI != "") {
       models.Playlist.fromURI(sourcePlaylistURI).load('name').done(function(sourcePlaylist) {
         sourceInputElement.value = sourcePlaylist.name;
         sourceInputElement.disabled = true;
+        shuffleHandler(sourcePlaylistURI);
       }).fail(function() {
         sourceInputElement.value = "";
-      });
-    }
-  }
-
-  function readDestination() {
-    destinationPlaylistURI = destinationInputElement.value;
-    if (destinationPlaylistURI != "") {
-      models.Playlist.fromURI(destinationPlaylistURI).load('name').done(function(destinationPlaylist) {
-        destinationInputElement.value = destinationPlaylist.name;
-        destinationInputElement.disabled = true;
-      }).fail(function() {
-        destinationInputElement.value = "";
       });
     }
   }
@@ -55,19 +31,42 @@ require([
   function clearSourceHandler() {
     sourceInputElement.value = "";
     sourceInputElement.disabled = false;
-    sourcePlaylistURI = "";
   }
 
-  function clearDestinationHandler() {
-    destinationInputElement.value = "";
-    destinationInputElement.disabled = false;
-    destinationPlaylistURI = "";
-  }
-
-  function shuffleHandler() {
-    if (sourcePlaylistURI != "" && destinationPlaylistURI != "") {
-      albumShuffle.shuffleAlbums(sourcePlaylistURI, destinationPlaylistURI);
-      models.player.playContext(models.Playlist.fromURI(destinationPlaylistURI).tracks);
+  function shuffleHandler(sourcePlaylistURI) {
+    var destinationName = "Album shuffler";
+    var destinationPlaylist = null;
+    var playlistFound = false;
+    var userLibrary = library.Library.forCurrentUser();
+    
+    var playlistElement = document.getElementById('playlistContainer');
+    if (playlistElement.childNodes.length != 0) {
+      playlistList.destroy();
     }
+
+    var sourcePlaylist = models.Playlist.fromURI(sourcePlaylistURI);
+    userLibrary.load('playlists').done(function(playlists) {
+      userLibrary.playlists.snapshot().done(function(librarySnapshot) {
+        librarySnapshot.loadAll('name').each(function(snapshotPlaylist) {
+          if (snapshotPlaylist.name == destinationName) {
+            playlistFound = true;
+            snapshotPlaylist.load('tracks').done(function(tracksplaylist) {
+              tracksplaylist.tracks.clear();
+            });
+            albumShuffle.shuffleAlbums(sourcePlaylist, snapshotPlaylist);
+            playlistList = list.List.forPlaylist(snapshotPlaylist);
+          }
+        });
+
+      });
+    if (playlistFound == false) {
+      models.Playlist.create(destinationName).done(function(newPlaylist) {         
+        albumShuffle.shuffleAlbums(sourcePlaylist, newPlaylist);
+        playlistList = list.List.forPlaylist(newPlaylist);
+      });  
+    }
+    playlistElement.appendChild(playlistList.node);
+    playlistList.init();
+  });
   }
 });
