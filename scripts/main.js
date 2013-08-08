@@ -7,6 +7,8 @@ require([
 ], function(models, library, albumShuffle, buttons, list) {
   'use strict';
 
+  var playlistElement = document.getElementById('playlistContainer');
+  
   var sourceInputElement = document.getElementById('SOURCE_URI_ID');
   sourceInputElement.addEventListener('input', readSource);
 
@@ -31,6 +33,9 @@ require([
   function clearSourceHandler() {
     sourceInputElement.value = "";
     sourceInputElement.disabled = false;
+    if (playlistElement.childNodes.length != 0) {
+      playlistList.destroy();
+    }
   }
 
   function shuffleHandler(sourcePlaylistURI) {
@@ -38,11 +43,6 @@ require([
     var destinationPlaylist = null;
     var playlistFound = false;
     var userLibrary = library.Library.forCurrentUser();
-    
-    var playlistElement = document.getElementById('playlistContainer');
-    if (playlistElement.childNodes.length != 0) {
-      playlistList.destroy();
-    }
 
     var sourcePlaylist = models.Playlist.fromURI(sourcePlaylistURI);
     userLibrary.load('playlists').done(function(playlists) {
