@@ -16,8 +16,8 @@ span.inputField {
 span.inputField span {
 	position: absolute;
     display: block;
-    top: -2px;
-    right: 10px;
+    top: -3px;
+    right: 15px;
     width: 18px;
     height: 18px;
     border-radius: 20px;
@@ -38,9 +38,9 @@ span.inputField input {
     padding-left: 25px;
     background: rgba(200,200,200,0.3);
     margin: 0 0 10px 0;
-    font-family:Gerogia;
-    font-size:18px;
-    font-weight:bold;
+    font-family: Georgia;
+    font-size: 18px;
+    font-weight: bold;
     width: 275px;
 	color: rgba(0,0,0,0.6);
 }
@@ -53,8 +53,4 @@ span.shuffleButton {
 	position: relative;
 	left: 30px;
 	top: 15px;
-}
-span.playlist {	
-	position: relative;
-	top: 40px;
 }

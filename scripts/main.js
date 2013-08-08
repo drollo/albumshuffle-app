@@ -1,13 +1,11 @@
 require([
   '$api/models',
   'scripts/albumshuffle',
-  '$views/list',
   '$views/buttons'
-], function(models, albumShuffle, list, buttons) {
+], function(models, albumShuffle, buttons) {
   'use strict';
 
   var sourcePlaylistURI = "", destinationPlaylistURI = "";
-  var sourceUriOK = false, destinationUriOK = false;
 
   var sourceInputElement = document.getElementById('SOURCE_URI_ID');
   sourceInputElement.addEventListener('input', readSource);
@@ -69,26 +67,7 @@ require([
   function shuffleHandler() {
     if (sourcePlaylistURI != "" && destinationPlaylistURI != "") {
       albumShuffle.shuffleAlbums(sourcePlaylistURI, destinationPlaylistURI);
-
-      var destinationPlaylist = models.Playlist.fromURI(destinationPlaylistURI);   
-      var playlistTable = list.List.forPlaylist(destinationPlaylist, { 
-        fields: [
-          'nowplaying',
-          'track', 
-          'artist', 
-          'album', 
-          'time'
-        ],
-        style: "rounded"
-      });
-        
-      var playlistElement = document.getElementById('playlistContainer');
-      if (playlistElement.childNodes.length != 0)
-      {
-        playlistElement.removeChild(playlistElement.childNodes[0]);
-      }
-      playlistElement.appendChild(playlistTable.node);
-      playlistTable.init();
+      models.player.playContext(models.Playlist.fromURI(destinationPlaylistURI).tracks);
     }
-  } 
+  }
 });
