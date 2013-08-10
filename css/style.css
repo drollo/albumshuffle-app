@@ -48,7 +48,7 @@ div.playlist {
 	position: relative;
 	top: 30px;
 }
-div.nextButton {
+span.nextButton {
 	position: relative;
 	top: 10px;
 	left: 25px;
@@ -56,4 +56,13 @@ div.nextButton {
 	width: 115px;
 	box-shadow: 
             10px 10px 20px  rgba(0,0,0,0.9);
+}
+span.reshuffleButton {
+	position: relative;
+	top: -15px;
+	left: 160px;
+	display: none;
+	width: 115px;
+	box-shadow: 
+            10px 10px 20px  rgba(0,0,0,0.9);	
 }

@@ -8,9 +8,9 @@ require([
   'use strict';
 
   var hintText = 'Drag playlist here';
-  var nameColor = 'rgba(0,0,0,0.6)';
-  var hintColor = 'rgba(0,0,0,0.2)';
-  var playlistList;
+  var nameColor = 'rgba(0,0,0,0.6)', hintColor = 'rgba(0,0,0,0.2)';
+  var playlistList, sourcePlaylistURI;
+  var reshuffled = false;
 
   var playlistElement = document.getElementById('playlist');
   document.getElementById('inputSpan').addEventListener('mouseover', deselectInput);
@@ -20,7 +20,13 @@ require([
   nextAlbumElement.appendChild(nextAlbumButton.node);
   nextAlbumElement.addEventListener('click', nextAlbum);
 
+  var reshuffleButton = buttons.Button.withLabel('Reshuffle Albums');
+  var reshuffleElement = document.getElementById('reshuffle');
+  reshuffleElement.appendChild(reshuffleButton.node);
+  reshuffleElement.addEventListener('click', reshuffle);
+
   var nextAlbumContainer = document.getElementById('nextAlbumContainer');
+  var reshuffleContainer = document.getElementById('reshuffleContainer');
 
   var sourceInputElement = document.getElementById('SOURCE_URI_ID');
   sourceInputElement.addEventListener('input', readSource);
@@ -29,8 +35,8 @@ require([
   sourceInputElement.addEventListener('dragleave', showHint);
   sourceInputElement.value = hintText;
 
-  var clearSourceButtonElement = document.getElementById("clearSourceButton");
-  clearSourceButtonElement.addEventListener('click', clearSourceHandler);
+  var clearSourceElement = document.getElementById("clearSourceButton");
+  clearSourceElement.addEventListener('click', clearSourceHandler);
 
   function nextAlbum() {
     if (models.player.playing == true) { 
@@ -38,12 +44,18 @@ require([
         currentPlayer.track.load('album').done(function(currentTrack) {
           models.Playlist.fromURI(currentPlayer.context.uri).load('tracks').done(function(currentPlaylist) {
             currentPlaylist.tracks.snapshot(currentPlayer.index, 30).done(function(currentShapshot) {
-              var nextFound = false;
-              var offset = 0;
+              var nextFound = false, offset = 0;
+              var albumToSkip = currentTrack.album;
               currentShapshot.loadAll('album').each(function(currentTrackToCheck) {
-                if (nextFound == false && currentTrack.album != currentTrackToCheck.album) {
-                  nextFound = true;
-                  playlistList.playTrack(currentPlayer.index + offset);
+                if (nextFound == false && albumToSkip != currentTrackToCheck.album) {
+                  if (reshuffled == true) {
+                    albumToSkip = currentTrackToCheck.album;
+                    reshuffled = false;
+                  }
+                  else {
+                    nextFound = true;
+                    playlistList.playTrack(currentPlayer.index + offset);                    
+                  }
                 }
                 offset++;
               });
@@ -52,6 +64,12 @@ require([
         });
       });
     }
+  }
+
+  function reshuffle() {   
+    playlistList.destroy();
+    shuffleHandler(sourcePlaylistURI);
+    reshuffled = true;
   }
 
   function deselectInput() {
@@ -69,15 +87,16 @@ require([
   }
   
   function readSource() {
-    var sourcePlaylistURI = sourceInputElement.value;
+    sourcePlaylistURI = sourceInputElement.value;
     if (sourcePlaylistURI != "") {
       models.Playlist.fromURI(sourcePlaylistURI).load('name').done(function(sourcePlaylist) {
         sourceInputElement.style.color = nameColor;
         sourceInputElement.value = sourcePlaylist.name;
         sourceInputElement.style.width = (sourceInputElement.value.length * 12).toString() + 'px';
         sourceInputElement.disabled = true;
-        clearSourceButtonElement.style.display = 'block';
+        clearSourceElement.style.display = 'block';
         nextAlbumContainer.style.display = 'block';
+        reshuffleContainer.style.display = 'block';
         shuffleHandler(sourcePlaylistURI);
       }).fail(function() {
         sourceInputElement.value = hintText;
@@ -93,8 +112,9 @@ require([
     if (playlistElement.childNodes.length != 0) {
       playlistList.destroy();
     }
-    clearSourceButtonElement.style.display = 'none';
+    clearSourceElement.style.display = 'none';
     nextAlbumContainer.style.display = 'none';
+    reshuffleContainer.style.display = 'none';
   }
 
   function shuffleHandler(sourcePlaylistURI) {
