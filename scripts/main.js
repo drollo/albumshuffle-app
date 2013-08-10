@@ -12,8 +12,15 @@ require([
   var hintColor = 'rgba(0,0,0,0.2)';
   var playlistList;
 
-  var playlistElement = document.getElementById('playlistContainer');
+  var playlistElement = document.getElementById('playlist');
   document.getElementById('inputSpan').addEventListener('mouseover', deselectInput);
+
+  var nextAlbumButton = buttons.Button.withLabel('Play Next Album');
+  var nextAlbumElement = document.getElementById('nextAlbum');
+  nextAlbumElement.appendChild(nextAlbumButton.node);
+  nextAlbumElement.addEventListener('click', nextAlbum);
+
+  var nextAlbumContainer = document.getElementById('nextAlbumContainer');
 
   var sourceInputElement = document.getElementById('SOURCE_URI_ID');
   sourceInputElement.addEventListener('input', readSource);
@@ -24,6 +31,28 @@ require([
 
   var clearSourceButtonElement = document.getElementById("clearSourceButton");
   clearSourceButtonElement.addEventListener('click', clearSourceHandler);
+
+  function nextAlbum() {
+    if (models.player.playing == true) { 
+      models.player.load(['index', 'context', 'track']).done(function(currentPlayer) {
+        currentPlayer.track.load('album').done(function(currentTrack) {
+          models.Playlist.fromURI(currentPlayer.context.uri).load('tracks').done(function(currentPlaylist) {
+            currentPlaylist.tracks.snapshot(currentPlayer.index, 30).done(function(currentShapshot) {
+              var nextFound = false;
+              var offset = 0;
+              currentShapshot.loadAll('album').each(function(currentTrackToCheck) {
+                if (nextFound == false && currentTrack.album != currentTrackToCheck.album) {
+                  nextFound = true;
+                  playlistList.playTrack(currentPlayer.index + offset);
+                }
+                offset++;
+              });
+            });
+          });
+        });
+      });
+    }
+  }
 
   function deselectInput() {
     window.getSelection().empty();
@@ -48,6 +77,7 @@ require([
         sourceInputElement.style.width = (sourceInputElement.value.length * 12).toString() + 'px';
         sourceInputElement.disabled = true;
         clearSourceButtonElement.style.display = 'block';
+        nextAlbumContainer.style.display = 'block';
         shuffleHandler(sourcePlaylistURI);
       }).fail(function() {
         sourceInputElement.value = hintText;
@@ -59,11 +89,12 @@ require([
     sourceInputElement.value = hintText;
     sourceInputElement.style.color = hintColor;
     sourceInputElement.disabled = false;
-    sourceInputElement.style.width = '190px'
+    sourceInputElement.style.width = '165px'
     if (playlistElement.childNodes.length != 0) {
       playlistList.destroy();
     }
     clearSourceButtonElement.style.display = 'none';
+    nextAlbumContainer.style.display = 'none';
   }
 
   function shuffleHandler(sourcePlaylistURI) {

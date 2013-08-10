@@ -39,12 +39,21 @@ span.inputField input {
     padding-left: 25px;
     background: rgba(200,200,200,0.7);
     font-size: 18px;
-    width: 190px;
+    width: 165px;
     min-width: 110px;
 	cursor: inherit;
 	color: rgba(0,0,0,0.2);
 }
-span.playlist {
+div.playlist {
 	position: relative;
 	top: 30px;
+}
+div.nextButton {
+	position: relative;
+	top: 10px;
+	left: 25px;
+	display: none;
+	width: 115px;
+	box-shadow: 
+            10px 10px 20px  rgba(0,0,0,0.9);
 }
