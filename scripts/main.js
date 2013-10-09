@@ -10,7 +10,6 @@ require([
   var hintText = 'Drag playlist here';
   var nameColor = 'rgba(0,0,0,0.6)', hintColor = 'rgba(0,0,0,0.2)';
   var playlistList, sourcePlaylistURI;
-  var reshuffled = false;
 
   var playlistElement = document.getElementById('playlist');
   document.getElementById('inputSpan').addEventListener('mouseover', deselectInput);
@@ -48,14 +47,8 @@ require([
               var albumToSkip = currentTrack.album;
               currentShapshot.loadAll('album').each(function(currentTrackToCheck) {
                 if (nextFound == false && albumToSkip != currentTrackToCheck.album) {
-                  if (reshuffled == true) {
-                    albumToSkip = currentTrackToCheck.album;
-                    reshuffled = false;
-                  }
-                  else {
-                    nextFound = true;
-                    playlistList.playTrack(currentPlayer.index + offset);                    
-                  }
+                  nextFound = true;
+                  playlistList.playTrack(currentPlayer.index + offset);                    
                 }
                 offset++;
               });
@@ -69,7 +62,6 @@ require([
   function reshuffle() {   
     playlistList.destroy();
     shuffleHandler(sourcePlaylistURI);
-    reshuffled = true;
   }
 
   function deselectInput() {
@@ -121,6 +113,7 @@ require([
     var destinationName = "Album shuffler";
     var destinationPlaylist = null;
     var playlistFound = false;
+    var libraryChecked = false;
     var userLibrary = library.Library.forCurrentUser();
 
     var sourcePlaylist = models.Playlist.fromURI(sourcePlaylistURI);
@@ -132,19 +125,36 @@ require([
             snapshotPlaylist.load('tracks').done(function(tracksplaylist) {
               tracksplaylist.tracks.clear();
             });
-            shuffleAlbums(sourcePlaylist, snapshotPlaylist);
-            playlistList = list.List.forPlaylist(snapshotPlaylist, {style: 'rounded'});
+            destinationPlaylist = shuffleAlbums(sourcePlaylist, snapshotPlaylist);
           }
         });
+        libraryChecked = true;
       });
-      if (playlistFound == false) {
-        models.Playlist.create(destinationName).done(function(newPlaylist) {         
-          shuffleAlbums(sourcePlaylist, newPlaylist);
-          playlistList = list.List.forPlaylist(newPlaylist, {style: 'rounded'});
-        });  
-      }
-      playlistElement.appendChild(playlistList.node);
-      playlistList.init();
     });
+    
+    var libraaryCheckSync = setInterval(function() {
+      if (libraryChecked == true) { 
+        clearInterval(libraaryCheckSync);
+        if (playlistFound == false) {
+          models.Playlist.create(destinationName).done(function(newPlaylist) {         
+            destinationPlaylist = shuffleAlbums(sourcePlaylist, newPlaylist);
+          });  
+        }
+      }
+    }, 100);
+
+    var shuffleSync = setInterval(function() {
+      if (destinationPlaylist != null) { 
+        clearInterval(shuffleSync);
+        playlistList = list.List.forPlaylist(destinationPlaylist, {style: 'rounded'});
+        playlistElement.appendChild(playlistList.node);
+        setTimeout(function(){
+          playlistList.init();
+          setTimeout(function(){
+            playlistList.playTrack(0);
+          }, 100);
+        }, 1000);  
+      }
+    }, 100);
   }
 });

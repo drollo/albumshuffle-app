@@ -1,7 +1,7 @@
 require([
   '$api/models'
-], function(models) {
-  'use strict';
+  ], function(models) {
+    'use strict';
 
   var shuffleAlbums = function(sourcePlaylist, destinationPlaylist) {
     var lastAlbum = null;
@@ -17,28 +17,28 @@ require([
             uniqueAlbumTracks.push(trackToCheck);
           }
         });
+        
+        shuffleArray(uniqueAlbumTracks);
+
+        //Write the albums containing the shuffled tracks to destination playlist
+        destinationPlaylist.load('tracks').done(function(destinationPlaylist){
+          destinationPlaylist.tracks.clear();
+          for (var i = 0; i < uniqueAlbumTracks.length; i++) {
+            uniqueAlbumTracks[i].load('album').done(function(shuffledTrack) {
+              var shuffledAlbum = shuffledTrack.album;
+              shuffledAlbum.load('tracks').done(function(shuffledAlbum) {
+                shuffledAlbum.tracks.snapshot().done(function(shuffledSnapshot) {
+                  for (var j = 0; j < shuffledSnapshot.length; j++) {
+                    destinationPlaylist.tracks.add(shuffledSnapshot.get(j));
+                  }
+                });
+              });
+            }); 
+          }
+        }); 
       });
     });
-
-    //Shuffle the list of tracks
-    shuffleArray(uniqueAlbumTracks);
-
-    //Write the albums containing the shuffled tracks to destination playlist
-    destinationPlaylist.load('tracks').done(function(destinationPlaylist){
-      destinationPlaylist.tracks.clear();
-      for (var i = 0; i < uniqueAlbumTracks.length; i++) {
-        uniqueAlbumTracks[i].load('album').done(function(shuffledTrack) {
-          var shuffledAlbum = shuffledTrack.album;
-          shuffledAlbum.load('tracks').done(function(shuffledAlbum) {
-            shuffledAlbum.tracks.snapshot().done(function(shuffledSnapshot) {
-              for (var j = 0; j < shuffledSnapshot.length; j++) {
-                destinationPlaylist.tracks.add(shuffledSnapshot.get(j));
-              }
-            });
-          });
-        }); 
-      }
-    });   
+    return destinationPlaylist;
   };
 
   //Fisher–Yates shuffle
